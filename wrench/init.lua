@@ -292,29 +292,27 @@ for name,info in pairs(supported_nodes) do
 		newdef.after_place_node = function(pos, placer, itemstack)
 			minetest.set_node(pos, {name = convert_to_original_name(itemstack:get_name()),
 												param2 = minetest.get_node(pos).param2})
-			minetest.after(0.5, function(pos, placer, itemstack)
-				local meta = minetest.get_meta(pos)
-				local inv = meta:get_inventory()
-				local data = minetest.deserialize(itemstack:get_metadata())
-				local lists = data.lists
-				for listname,list in pairs(lists) do
-					inv:set_list(listname, list)
+			local meta = minetest.get_meta(pos)
+			local inv = meta:get_inventory()
+			local data = minetest.deserialize(itemstack:get_metadata())
+			local lists = data.lists
+			for listname,list in pairs(lists) do
+				inv:set_list(listname, list)
+			end
+			local metas = data.metas
+			local temp = nil
+			for i=1,#metas,1 do
+				temp = metas[i]
+				if temp.string ~= nil then
+					meta:set_string(temp.string, temp.value)
 				end
-				local metas = data.metas
-				local temp = nil
-				for i=1,#metas,1 do
-					temp = metas[i]
-					if temp.string ~= nil then
-						meta:set_string(temp.string, temp.value)
-					end
-					if temp.int ~= nil then
-						meta:set_int(temp.int, temp.value)
-					end
-					if temp.float ~= nil then
-						meta:set_float(temp.float, temp.value)
-					end
+				if temp.int ~= nil then
+					meta:set_int(temp.int, temp.value)
 				end
-			end, pos, placer, itemstack)
+				if temp.float ~= nil then
+					meta:set_float(temp.float, temp.value)
+				end
+			end
 		end
 		minetest.register_node(info.name, newdef)
 	end
